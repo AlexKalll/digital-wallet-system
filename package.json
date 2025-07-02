@@ -1,0 +1,29 @@
+{
+  "name": "digital-wallet-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "coreState.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "devDependencies": {
+      "jest": "^26.6.3"
+    },
+    "url": "git+https://github.com/AlexKalll/digital-wallet-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexKalll/digital-wallet-system/issues"
+  },
+  "homepage": "https://github.com/AlexKalll/digital-wallet-system#readme",
+  "devDependencies": {
+    "jest": "^30.0.3"
+  }
+}
