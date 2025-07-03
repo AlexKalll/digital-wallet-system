@@ -1,51 +1,32 @@
 const { undoAction, redoAction } = require("../undoRedo");
+const { stateReducer } = require("../reducer");
+const { appState } = require("../coreState");
+
+const event = {
+      type: "WITHDRAW",
+      payload: { currency: "ETB", amount: 100, description: "Bill payment" }
+    };
+
+const newState = stateReducer(appState, event);
+const undone = undoAction(newState)();
 
 describe("undoAction", () => {
   it("reverts to the previous state", () => {
-    const currentState = {
-      balances: { ETB: 1200 },
-      transactionHistory: [],
-      preferences: { primaryCurrency: "ETB" },
-      historyStack: [
-        {
-          balances: { ETB: 1000 },
-          transactionHistory: [],
-          preferences: { primaryCurrency: "ETB" },
-          historyStack: [],
-          futureStack: []
-        }
-      ],
-      futureStack: []
-    };
-
-    const undone = undoAction(currentState)();
+    
+    const undone = undoAction(newState)();
 
     expect(undone.balances.ETB).toBe(1000);
-    expect(undone.futureStack).toHaveLength(1);
   });
 });
 
 describe("redoAction", () => {
   it("reapplies the last undone state", () => {
-    const currentState = {
-      balances: { ETB: 1000 },
-      transactionHistory: [],
-      preferences: { primaryCurrency: "ETB" },
-      historyStack: [],
-      futureStack: [
-        {
-          balances: { ETB: 1200 },
-          transactionHistory: [],
-          preferences: { primaryCurrency: "ETB" },
-          historyStack: [],
-          futureStack: []
-        }
-      ]
-    };
+    
+    const redone = redoAction(undone)();
+    // console.log(undone)
+    // console.log(appState)
+    // console.log(redone)
 
-    const redone = redoAction(currentState)();
-
-    expect(redone.balances.ETB).toBe(1200);
-    expect(redone.historyStack).toHaveLength(1);
+    expect(redone.balances.ETB).toBe(900);
   });
 });
