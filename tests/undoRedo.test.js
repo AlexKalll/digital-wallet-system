@@ -16,6 +16,8 @@ describe("undoAction", () => {
     const undone = undoAction(newState)();
 
     expect(undone.balances.ETB).toBe(1000);
+    console.log(`Old: ${appState.balances.ETB}`)
+    console.log(`New: ${undone.balances.ETB}`)
   });
 });
 
