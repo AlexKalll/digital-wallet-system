@@ -1,11 +1,16 @@
 const { stateReducer } = require("./reducer");
+const { appState } = require("./coreState");
+const {logTransaction} = require("./logger")
 
-function dispatchAction(state, event, loggerFn) {
-  const newState = stateReducer(state, event);
+function dispatchAction(event) {
+  const newState = stateReducer(appState, event);
 
-  // Optionally run the curried logger
-  if (typeof loggerFn === "function") {
-    loggerFn(); // Executes the final curried logging call
+  // handling logging utility
+  if (event.type == "DEPOSIT" || event.type == "WITHDRAW" ){
+  logTransaction(event.type)(event.payload.currency)(event.payload.amount)(event.payload.description)();
+  }
+  else{
+    logTransaction(event.type)(event.payload.fromCurrency)(event.payload.amount) (`to — ${event.payload.toCurrency}`)();
   }
 
   return newState;
