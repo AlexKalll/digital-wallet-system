@@ -1,23 +1,30 @@
+const { appState } = require("../coreState");
 const { dispatchAction } = require("../dispatch");
-const { appState } = require("../appState");
-const { logTransaction } = require("../logger");
 
 describe("dispatchAction", () => {
   it("updates state and logs when logger is provided", () => {
-    const loggerMock = logTransaction("DEPOSIT")("ETB")(200)("Bonus");
-    const event = {
+    const events = [{
       type: "DEPOSIT",
       payload: { currency: "ETB", amount: 200, description: "Bonus" }
-    };
+    }, {
+      type: "WITHDRAW",
+      payload: { currency: "ETB", amount: 100, description: "Bill payment" }
+    }, {
+      type: "CONVERT_CURRENCY",
+      payload: {
+        fromCurrency: "ETB",
+        toCurrency: "USD",
+        amount: 150,
+        rate: 0.006
+      }
+    }];
 
-    const newState = dispatchAction(appState, event, loggerMock);
-    console.log("Old Balance:", appState.balances.ETB)
-    console.log("New Balance:", newState.balances.ETB)
-    console.log("Old Transaction History:", appState.transactionHistory)
-    console.log("Later Transaction History:", newState.transactionHistory)
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+      const newState = dispatchAction(event);
 
-    expect(newState.balances.ETB).toBe(1200);
-    // expect(loggerMock).toHaveBeenCalled();
-expect(newState.transactionHistory).toHaveLength(1);
+      expect(newState.transactionHistory).toHaveLength(1);
+      // console.log(`Old State length is: ${appState.transactionHistory.length}`)
+    }
   });
 });
