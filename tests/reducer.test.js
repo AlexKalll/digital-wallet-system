@@ -2,10 +2,10 @@ const { stateReducer } = require("../reducer");
 const { appState } = require("../coreState");
 
 describe("stateReducer", () => {
-  it("handles DEPOSIT action immutably", () => {
+  it("handles DEPOSIT action with immutable state", () => {
     const event = {
       type: "DEPOSIT",
-      payload: { currency: "USD", amount: 100 }
+      payload: { currency: "USD", amount: 100, description: "Savings" }
     };
 
     const newState = stateReducer(appState, event);
@@ -15,15 +15,26 @@ describe("stateReducer", () => {
     expect(newState.transactionHistory).toHaveLength(1);
   });
 
-  it("prevents overdraft on WITHDRAW", () => {
+  it("prevents WITHDRAWAL if the amount is greater than the balance", () => {
     const event = {
       type: "WITHDRAW",
-      payload: { currency: "USD", amount: 9999 }
+      payload: { currency: "ETB", amount: 10000 }
+    };
+
+    const newState = stateReducer(appState, event);
+    expect(newState).toEqual(appState);
+  });
+
+  it("handles WITHDRAW action with immutable state", () => {
+    const event = {
+      type: "WITHDRAW",
+      payload: { currency: "ETB", amount: 100, description: "Bill payment" }
     };
 
     const newState = stateReducer(appState, event);
 
-    expect(newState).toEqual(appState);
+    expect(newState.balances.ETB).toBe(900);
+    expect(newState.transactionHistory).toHaveLength(1);
   });
 
   it("handles CONVERT_CURRENCY properly", () => {
@@ -32,14 +43,17 @@ describe("stateReducer", () => {
       payload: {
         fromCurrency: "ETB",
         toCurrency: "USD",
-        amount: 100,
-        rate: 0.02
+        amount: 150,
+        rate: 0.006
       }
     };
 
     const newState = stateReducer(appState, event);
+    // console.log(appState)
+    // console.log(newState)
 
-    expect(newState.balances.ETB).toBe(900);
-    expect(newState.balances.USD).toBe(202);
+    expect(newState.balances.ETB).toBe(850);
+    expect(newState.balances.USD).toBe(200.9);
+    expect(newState.transactionHistory).toHaveLength(1);
   });
 });
