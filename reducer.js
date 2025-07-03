@@ -4,20 +4,20 @@ function stateReducer(state, event) {
       const { currency, amount, description = "" } = event.payload;
       const oldBalance = state.balances[currency] || 0;
 
-      const newBalances = {
-        ...state.balances,
-        [currency]: oldBalance + amount
-      };
+      const newState = structuredClone(state);
+
+      newState.balances[currency] = oldBalance + amount;
 
       const transactionRecord = {
-        type: "DEPOSIT", currency, amount, description, timestamp: Date.now()
-      }
+        type: "DEPOSIT",
+        currency,
+        amount,
+        description,
+        timestamp: Date.now()
+      };
 
-      const newState = {...state};
-      
-      newState.balances = newBalances;
-      newState.transactionHistory = [...state.transactionHistory, transactionRecord];
-      newState.historyStack = [...state.historyStack, state];
+      newState.transactionHistory.push(transactionRecord);
+      newState.historyStack.push(structuredClone(state)); // deep snapshot
       newState.futureStack = [];
 
       return newState;
@@ -32,20 +32,19 @@ function stateReducer(state, event) {
         return state;
       }
 
-      const newBalances = {
-        ...state.balances,
-        [currency]: currentBalance - amount
-      };
+      const newState = structuredClone(state);
+      newState.balances[currency] = currentBalance - amount;
 
       const transactionRecord = {
-        type: "WITHDRAW", currency, amount, description, timestamp: Date.now()
-      }
+        type: "WITHDRAW",
+        currency,
+        amount,
+        description,
+        timestamp: Date.now()
+      };
 
-      const newState = {...state};
-      
-      newState.balances = newBalances;
-      newState.transactionHistory = [...state.transactionHistory, transactionRecord];
-      newState.historyStack = [...state.historyStack, state];
+      newState.transactionHistory.push(transactionRecord);
+      newState.historyStack.push(structuredClone(state));
       newState.futureStack = [];
 
       return newState;
@@ -61,19 +60,24 @@ function stateReducer(state, event) {
       }
 
       const convertedAmount = amount * rate;
-      
-      const newBalances = {
-        ...state.balances,
-        [fromCurrency]: fromBalance - amount,
-        [toCurrency]: (state.balances[toCurrency] || 0) + convertedAmount
+
+      const newState = structuredClone(state);
+      newState.balances[fromCurrency] -= amount;
+      newState.balances[toCurrency] = (newState.balances[toCurrency] || 0) + convertedAmount;
+
+      const transactionRecord = {
+        type: "CONVERT_CURRENCY",
+        fromCurrency,
+        toCurrency,
+        amount,
+        convertedAmount,
+        rate,
+        description,
+        timestamp: Date.now()
       };
 
-      const transactionRecord = { type: "CONVERT_CURRENCY", fromCurrency, toCurrency, amount, convertedAmount, rate, description, timestamp: Date.now() };
-
-      const newState = {...state};
-      newState.balances = newBalances;
-      newState.transactionHistory = [...state.transactionHistory, transactionRecord];
-      newState.historyStack = [...state.historyStack, state];
+      newState.transactionHistory.push(transactionRecord);
+      newState.historyStack.push(structuredClone(state));
       newState.futureStack = [];
 
       return newState;

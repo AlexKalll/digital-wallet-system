@@ -1,4 +1,4 @@
-//undo to previous state if it exists
+// undo to previous state if it exists
 const undoAction = (state) => () => {
   const { historyStack, futureStack } = state;
 
@@ -7,13 +7,14 @@ const undoAction = (state) => () => {
     return state;
   }
 
-  const previousState = historyStack[historyStack.length - 1];
-  const newHistory = historyStack.slice(0, historyStack.length - 1);
+  const previousState = structuredClone(historyStack[historyStack.length - 1]);
+  const newHistory = structuredClone(historyStack.slice(0, historyStack.length - 1));
+  const newFuture = structuredClone([...futureStack, structuredClone(state)]);
 
   return {
     ...previousState,
     historyStack: newHistory,
-    futureStack: [...futureStack, state]
+    futureStack: newFuture
   };
 };
 
@@ -26,12 +27,13 @@ const redoAction = (state) => () => {
     return state;
   }
 
-  const nextState = futureStack[futureStack.length - 1];
-  const newFuture = futureStack.slice(0, futureStack.length - 1);
+  const nextState = structuredClone(futureStack[futureStack.length - 1]);
+  const newFuture = structuredClone(futureStack.slice(0, futureStack.length - 1));
+  const newHistory = structuredClone([...historyStack, structuredClone(state)]);
 
   return {
     ...nextState,
-    historyStack: [...historyStack, state],
+    historyStack: newHistory,
     futureStack: newFuture
   };
 };
