@@ -10,20 +10,17 @@ function stateReducer(state, event) {
       };
 
       const transactionRecord = {
-        type: "DEPOSIT",
-        currency,
-        amount,
-        description,
-        timestamp: Date.now()
-      };
+        type: "DEPOSIT", currency, amount, description, timestamp: Date.now()
+      }
 
-      return {
-        ...state,
-        balances: newBalances,
-        transactionHistory: [...state.transactionHistory, transactionRecord],
-        historyStack: [...state.historyStack, state],
-        futureStack: []
-      };
+      const newState = {...state};
+      
+      newState.balances = newBalances;
+      newState.transactionHistory = [...state.transactionHistory, transactionRecord];
+      newState.historyStack = [...state.historyStack, state];
+      newState.futureStack = [];
+
+      return newState;
     }
 
     case "WITHDRAW": {
@@ -41,20 +38,17 @@ function stateReducer(state, event) {
       };
 
       const transactionRecord = {
-        type: "WITHDRAW",
-        currency,
-        amount,
-        description,
-        timestamp: Date.now()
-      };
+        type: "WITHDRAW", currency, amount, description, timestamp: Date.now()
+      }
 
-      return {
-        ...state,
-        balances: newBalances,
-        transactionHistory: [...state.transactionHistory, transactionRecord],
-        historyStack: [...state.historyStack, state],
-        futureStack: []
-      };
+      const newState = {...state};
+      
+      newState.balances = newBalances;
+      newState.transactionHistory = [...state.transactionHistory, transactionRecord];
+      newState.historyStack = [...state.historyStack, state];
+      newState.futureStack = [];
+
+      return newState;
     }
 
     case "CONVERT_CURRENCY": {
@@ -67,68 +61,22 @@ function stateReducer(state, event) {
       }
 
       const convertedAmount = amount * rate;
-
+      
       const newBalances = {
         ...state.balances,
         [fromCurrency]: fromBalance - amount,
         [toCurrency]: (state.balances[toCurrency] || 0) + convertedAmount
       };
 
-      const transactionRecord = {
-        type: "CONVERT_CURRENCY",
-        fromCurrency,
-        toCurrency,
-        amount,
-        convertedAmount,
-        rate,
-        description,
-        timestamp: Date.now()
-      };
+      const transactionRecord = { type: "CONVERT_CURRENCY", fromCurrency, toCurrency, amount, convertedAmount, rate, description, timestamp: Date.now() };
 
-      return {
-        ...state,
-        balances: newBalances,
-        transactionHistory: [...state.transactionHistory, transactionRecord],
-        historyStack: [...state.historyStack, state],
-        futureStack: []
-      };
-    }
+      const newState = {...state};
+      newState.balances = newBalances;
+      newState.transactionHistory = [...state.transactionHistory, transactionRecord];
+      newState.historyStack = [...state.historyStack, state];
+      newState.futureStack = [];
 
-    case "TRANSFER_FUNDS": {
-      const { fromCurrency, toCurrency, amount, rate, description = "" } = event.payload;
-      const fromBalance = state.balances[fromCurrency] || 0;
-
-      if (amount > fromBalance) {
-        console.warn("Insufficient funds for transfer");
-        return state;
-      }
-
-      const convertedAmount = amount * rate;
-
-      const newBalances = {
-        ...state.balances,
-        [fromCurrency]: fromBalance - amount,
-        [toCurrency]: (state.balances[toCurrency] || 0) + convertedAmount
-      };
-
-      const transactionRecord = {
-        type: "TRANSFER_FUNDS",
-        fromCurrency,
-        toCurrency,
-        amount,
-        convertedAmount,
-        rate,
-        description,
-        timestamp: Date.now()
-      };
-
-      return {
-        ...state,
-        balances: newBalances,
-        transactionHistory: [...state.transactionHistory, transactionRecord],
-        historyStack: [...state.historyStack, state],
-        futureStack: []
-      };
+      return newState;
     }
 
     default:
